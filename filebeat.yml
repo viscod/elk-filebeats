@@ -15,12 +15,12 @@ filebeat.autodiscover:
       templates:
         - condition:
             contains:
-              docker.container.image: redis
+              docker.container.image: start-backend
           config:
             - type: container
               paths:
                 - /var/lib/docker/containers/${data.docker.container.id}/*.log
-              exclude_lines: ["^\\s+[\\-`('.|_]"]  # drop asciiart lines
+              include_lines: ['.*zid_log_event.*']
 
 processors:
 - add_host_metadata: ~
