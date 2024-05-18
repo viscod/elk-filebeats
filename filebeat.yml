@@ -3,6 +3,10 @@ filebeat.inputs:
    id: default-filestream
    paths:
    - ingest_data/*.log
+ - type: container
+   stream: stdout
+   paths:
+    - "/var/log/containers/*.log"
 
 
 filebeat.autodiscover:
