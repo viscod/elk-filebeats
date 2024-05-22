@@ -4,10 +4,10 @@ filebeat.config:
     reload.enabled: false
 
 filebeat.inputs:
- - type: filestream
-   id: default-filestream
-   paths:
-   - ingest_data/*.log
+  - type: filestream
+    id: default-filestream
+    paths:
+      - ingest_data/*.log
 
 filebeat.autodiscover:
   providers:
@@ -21,19 +21,29 @@ filebeat.autodiscover:
               paths:
                 - /var/lib/docker/containers/${data.docker.container.id}/*.log
               include_lines: ['.*zid_log_event.*']
+              processors:
+                - dissect:
+                    tokenizer: "[%{timestamp}] %{log_level}: %{prefix}:%{json_log}"
+                    field: "message"
+                    target_prefix: ""
+                    overwrite_keys: true
+                - decode_json_fields:
+                    fields: ["json_log"]
+                    target: "decoded_json_log"
+                    overwrite_keys: true
+              max_bytes: 20971520
 
 processors:
-- add_host_metadata: ~
+  - add_host_metadata: ~
 
 setup.kibana:
- host: ${KIBANA_HOSTS}
- username: ${ELASTIC_USER}
- password: ${ELASTIC_PASSWORD}
-
+  host: ${KIBANA_HOSTS}
+  username: ${ELASTIC_USER}
+  password: ${ELASTIC_PASSWORD}
 
 output.elasticsearch:
- hosts: ${ELASTIC_HOSTS}
- username: ${ELASTIC_USER}
- password: ${ELASTIC_PASSWORD}
- ssl.enabled: true
- ssl.certificate_authorities: "certs/ca/ca.crt"
+  hosts: ${ELASTIC_HOSTS}
+  username: ${ELASTIC_USER}
+  password: ${ELASTIC_PASSWORD}
+  ssl.enabled: true
+  ssl.certificate_authorities: "certs/ca/ca.crt"
